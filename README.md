@@ -29,3 +29,7 @@ docker-compose up
 KafkaUI -> localhost:8080
 
 Applications -> localhost:3000
+
+## Api documentation
+
+OM-Trainning.postman_collection.json
