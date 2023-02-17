@@ -1,15 +1,16 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { ClientKafka } from '@nestjs/microservices';
+import { ClientKafka, RpcException } from '@nestjs/microservices';
 
 import { CreateTerminalDto } from '@app/common';
 import { OnModuleInit } from '@nestjs/common';
-import { lastValueFrom } from 'rxjs';
+import { catchError, lastValueFrom, throwError } from 'rxjs';
 import { Observable } from 'rxjs';
 import { CreateTerminalDetailDto } from '@app/common/dto/terminal-detail/create-terminal-detail.dto';
 import { CreateTermnalConfigDto } from '@app/common/dto/terminal-config/create-termnal-config.dto';
 import { CreateOperationDto } from '@app/common/dto/operation/create-operation.dto';
 import { CreateCarrierDto } from '@app/common/dto/carrier/create-carrier.dto';
 import { DestinationStore } from '@app/common/types';
+import { TerminalEntity } from '@app/common/entities/terminal.entity';
 
 @Injectable()
 export class ApiGatewayService implements OnModuleInit {
@@ -47,14 +48,8 @@ export class ApiGatewayService implements OnModuleInit {
     return this.terminalClient.send('terminal-creating', createTerminalDto);
   }
 
-  async getTerminals(code: string) {
-    try {
-      return await lastValueFrom(
-        this.terminalClient.send('terminal-listing', code),
-      );
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
+  getTerminals(code: string) {
+    return this.terminalClient.send('terminal-listing', code || '');
   }
 
   createTerminalDetail(
@@ -66,14 +61,11 @@ export class ApiGatewayService implements OnModuleInit {
     );
   }
 
-  async getTerminalsDetail(code: string) {
-    try {
-      return await lastValueFrom(
-        this.terminalDetailClient.send('terminal-detail-listing', code),
-      );
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
+  getTerminalsDetail(code: string): Observable<any> {
+    return this.terminalDetailClient.send(
+      'terminal-detail-listing',
+      code || '',
+    );
   }
 
   createTerminalConfig(
@@ -85,17 +77,11 @@ export class ApiGatewayService implements OnModuleInit {
     );
   }
 
-  async getTerminalsConfig(code: string) {
-    try {
-      return await lastValueFrom(
-        this.terminalConfigClient.send(
-          'terminal-config-listing',
-          JSON.stringify(code) || '',
-        ),
-      );
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
+  getTerminalsConfig(code: string): Observable<any> {
+    return this.terminalConfigClient.send(
+      'terminal-config-listing',
+      code || '',
+    );
   }
 
   createOperation(createOperationDto: CreateOperationDto): Observable<any> {
@@ -105,49 +91,27 @@ export class ApiGatewayService implements OnModuleInit {
     );
   }
 
-  async getOperation(code: string) {
-    try {
-      return await lastValueFrom(
-        this.terminalDetailClient.send(
-          'operation-listing',
-          JSON.stringify(code) || '',
-        ),
-      );
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
+  getOperation(code: string): Observable<any> {
+    return this.terminalDetailClient.send('operation-listing', code || '');
   }
 
-  createCarrier(createCarrierDto: CreateCarrierDto) {
+  createCarrier(createCarrierDto: CreateCarrierDto): Observable<any> {
     return this.terminalDetailClient.send('carrier-creating', createCarrierDto);
   }
 
-  async getCarrier(code: string) {
-    try {
-      return await lastValueFrom(
-        this.terminalDetailClient.send(
-          'carrier-listing',
-          JSON.stringify(code) || '',
-        ),
-      );
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
+  getCarrier(code: string): Observable<any> {
+    return this.terminalDetailClient.send('carrier-listing', code || '');
   }
 
   createLogo(
     file: Express.Multer.File,
     storage: DestinationStore,
     terminalCode: string,
-  ) {
-    try {
-      return this.terminalDetailClient.send('logo-creating', {
-        file,
-        storage,
-        terminalCode,
-      });
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
+  ): Observable<any> {
+    return this.terminalDetailClient.send('logo-creating', {
+      file,
+      storage,
+      terminalCode,
+    });
   }
 }

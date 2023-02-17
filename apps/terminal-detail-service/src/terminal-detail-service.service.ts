@@ -36,13 +36,7 @@ export class TerminalDetailService {
       createTerminalDetailDto,
     );
 
-    return {
-      headers: {
-        kafka_nestRealm: 'Nest',
-      },
-      key: 'creating detail terminal',
-      value: JSON.stringify(created),
-    };
+    return JSON.stringify(created);
   }
 
   async findAll(): Promise<TerminalDetailEntity[]> {
@@ -55,6 +49,7 @@ export class TerminalDetailService {
   }
 
   async findOneBelong(terminalCode: string) {
+    await this.terminalService.findOne(terminalCode);
     let exist = await this.terminalDetailRepository.findOne({
       relations: ['terminal'],
       where: {
@@ -63,20 +58,18 @@ export class TerminalDetailService {
         },
       },
     });
-    if (!exist) throw new NotFoundException('This terminal does not exist !');
-    else {
-      exist = {
-        ...exist,
-        createdDate: formatUTC(exist.createdDate),
-        updatedDate: formatUTC(exist.updatedDate),
-        terminal: {
-          ...(exist.terminal as TerminalEntity),
-          createdDate: formatUTC(exist.terminal['createdDate']),
-          updatedDate: formatUTC(exist.terminal['updatedDate']),
-        },
-      };
-      return exist;
-    }
+
+    exist = {
+      ...exist,
+      createdDate: formatUTC(exist.createdDate),
+      updatedDate: formatUTC(exist.updatedDate),
+      terminal: {
+        ...(exist.terminal as TerminalEntity),
+        createdDate: formatUTC(exist.terminal['createdDate']),
+        updatedDate: formatUTC(exist.terminal['updatedDate']),
+      },
+    };
+    return JSON.stringify(exist);
   }
 
   // -------------- For operation methods
@@ -85,13 +78,7 @@ export class TerminalDetailService {
 
     const created = await this.operationEntity.insert(createOperationDto);
 
-    return {
-      headers: {
-        kafka_nestRealm: 'Nest',
-      },
-      key: '',
-      value: JSON.stringify(created),
-    };
+    return JSON.stringify(created);
   }
 
   async findAllOperation() {
@@ -104,7 +91,7 @@ export class TerminalDetailService {
   }
 
   async findOperationBelong(terminalCode: string) {
-    let exist = await this.operationEntity.findOne({
+    const exist = await this.operationEntity.findOne({
       relations: ['terminal'],
       where: {
         terminal: {
@@ -112,39 +99,24 @@ export class TerminalDetailService {
         },
       },
     });
-    if (!exist) throw new NotFoundException('This terminal does not exist !');
-    else {
-      exist = {
-        ...exist,
-        createdDate: formatUTC(exist.createdDate),
-        updatedDate: formatUTC(exist.updatedDate),
-        terminal: {
-          ...(exist.terminal as TerminalEntity),
-          createdDate: formatUTC(exist.terminal['createdDate']),
-          updatedDate: formatUTC(exist.terminal['updatedDate']),
-        },
-      };
-      return {
-        headers: {
-          kafka_nestRealm: 'Nest',
-        },
-        key: terminalCode,
-        value: JSON.stringify(exist),
-      };
-    }
+
+    return {
+      ...exist,
+      createdDate: formatUTC(exist.createdDate),
+      updatedDate: formatUTC(exist.updatedDate),
+      terminal: {
+        ...(exist.terminal as TerminalEntity),
+        createdDate: formatUTC(exist.terminal['createdDate']),
+        updatedDate: formatUTC(exist.terminal['updatedDate']),
+      },
+    };
   }
 
-  async createCarrier(createCarrierDto: CreateCarrierDto) {
+  async createCarrier(createCarrierDto: CreateCarrierDto): Promise<string> {
     await this.terminalService.findOne(createCarrierDto.terminal);
 
     const created = await this.carrierEntity.insert(createCarrierDto);
-    return {
-      headers: {
-        kafka_nestRealm: 'Nest',
-      },
-      key: '',
-      value: JSON.stringify(created),
-    };
+    return JSON.stringify(created);
   }
 
   async findAllCarriers() {
@@ -157,7 +129,8 @@ export class TerminalDetailService {
   }
 
   async findCarrierBelong(terminalCode: string) {
-    let exist = await this.carrierEntity.findOne({
+    await this.terminalService.findOne(terminalCode);
+    const exist = await this.carrierEntity.findOne({
       relations: ['terminal'],
       where: {
         terminal: {
@@ -166,26 +139,16 @@ export class TerminalDetailService {
       },
     });
 
-    if (!exist) throw new NotFoundException('This terminal does not exist !');
-    else {
-      exist = {
-        ...exist,
-        createdDate: formatUTC(exist.createdDate),
-        updatedDate: formatUTC(exist.updatedDate),
-        terminal: {
-          ...(exist.terminal as TerminalEntity),
-          createdDate: formatUTC(exist.terminal['createdDate']),
-          updatedDate: formatUTC(exist.terminal['updatedDate']),
-        },
-      };
-      return {
-        headers: {
-          kafka_nestRealm: 'Nest',
-        },
-        key: '',
-        value: JSON.stringify(exist),
-      };
-    }
+    return {
+      ...exist,
+      createdDate: formatUTC(exist.createdDate),
+      updatedDate: formatUTC(exist.updatedDate),
+      terminal: {
+        ...(exist.terminal as TerminalEntity),
+        createdDate: formatUTC(exist.terminal['createdDate']),
+        updatedDate: formatUTC(exist.terminal['updatedDate']),
+      },
+    };
   }
 
   async createLogo(
@@ -211,13 +174,8 @@ export class TerminalDetailService {
             logo: `logo/${file.originalname}`,
             terminal: terminalCode,
           });
-          return {
-            headers: {
-              kafka_nestRealm: 'Nest',
-            },
-            key: 'Create logo',
-            value: JSON.stringify(created),
-          };
+
+          return JSON.stringify(created);
         } else {
           const updated = await this.logoRepository
             .createQueryBuilder()
@@ -228,13 +186,8 @@ export class TerminalDetailService {
             })
             .where('terminal = :terminalCode', { terminalCode })
             .execute();
-          return {
-            headers: {
-              kafka_nestRealm: 'Nest',
-            },
-            key: 'Create logo',
-            value: JSON.stringify(updated),
-          };
+
+          return JSON.stringify(updated);
         }
       case 'NAME':
         exist = await this.logoRepository.findOne({
@@ -251,13 +204,8 @@ export class TerminalDetailService {
             name: `name/${file.originalname}`,
             terminal: terminalCode,
           });
-          return {
-            headers: {
-              kafka_nestRealm: 'Nest',
-            },
-            key: 'Create logo',
-            value: JSON.stringify(created),
-          };
+
+          return JSON.stringify(created);
         } else {
           const updated = await this.logoRepository
             .createQueryBuilder()
@@ -269,13 +217,7 @@ export class TerminalDetailService {
             .where('terminal = :terminalCode', { terminalCode })
             .execute();
 
-          return {
-            headers: {
-              kafka_nestRealm: 'Nest',
-            },
-            key: 'Create logo',
-            value: JSON.stringify(updated),
-          };
+          return JSON.stringify(updated);
         }
 
       case 'LOGO_AND_NAME':
@@ -293,14 +235,7 @@ export class TerminalDetailService {
             logoAndName: `logo_and_name/${file.originalname}`,
             terminal: terminalCode,
           });
-
-          return {
-            headers: {
-              kafka_nestRealm: 'Nest',
-            },
-            key: 'Create logo',
-            value: JSON.stringify(created),
-          };
+          return JSON.stringify(created);
         } else {
           const updated = await this.logoRepository
             .createQueryBuilder()
@@ -312,18 +247,15 @@ export class TerminalDetailService {
             .where('terminal = :terminalCode', { terminalCode })
             .execute();
 
-          return {
-            headers: {
-              kafka_nestRealm: 'Nest',
-            },
-            key: 'Create logo',
-            value: JSON.stringify(updated),
-          };
+          return JSON.stringify(updated);
         }
 
       default:
-        throw new NotFoundException(
-          'Storage was not defined on query parameter !. Please define a storage',
+        return new Promise((resolve, reject) =>
+          reject({
+            detail:
+              'Storage was not defined on query parameter !. Please define a storage one of these options [LOGO, NAME, LOGO_NAME]',
+          }),
         );
     }
   }

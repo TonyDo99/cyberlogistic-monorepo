@@ -15,8 +15,6 @@ import {
   Body,
   Controller,
   Get,
-  HttpException,
-  HttpStatus,
   ParseFilePipe,
   Post,
   Query,
@@ -26,7 +24,7 @@ import {
 import { RpcException } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { Observable } from 'rxjs';
+import { catchError, Observable } from 'rxjs';
 import { ApiGatewayService } from './api-gateway.service';
 
 @Controller()
@@ -37,18 +35,20 @@ export class ApiGatewayController {
   createTerminal(
     @Body() createTerminalDto: CreateTerminalDto,
   ): Observable<any> {
-    try {
-      return this.apiGatewayService.createTerminal(createTerminalDto);
-    } catch (error) {
-      throw new RpcException(error.message);
-    }
+    return this.apiGatewayService.createTerminal(createTerminalDto).pipe(
+      catchError((error) => {
+        throw new RpcException(error);
+      }),
+    );
   }
 
   @Get('terminal')
-  async findTerminals(
-    @Query('terminal-code') code: string,
-  ): Promise<TerminalEntity> {
-    return await this.apiGatewayService.getTerminals(code);
+  findTerminals(@Query('terminal-code') code: string) {
+    return this.apiGatewayService.getTerminals(code).pipe(
+      catchError((error) => {
+        throw new RpcException(error);
+      }),
+    );
   }
 
   // Terminal detail
@@ -56,18 +56,20 @@ export class ApiGatewayController {
   createTerminalDetail(
     @Body() createTerminalDto: CreateTerminalDetailDto,
   ): Observable<any> {
-    return this.apiGatewayService.createTerminalDetail(createTerminalDto);
+    return this.apiGatewayService.createTerminalDetail(createTerminalDto).pipe(
+      catchError((error) => {
+        throw new RpcException(error);
+      }),
+    );
   }
 
   @Get('terminal-detail')
-  async findTerminalsDetail(
-    @Query('terminal-code') code: string,
-  ): Promise<TerminalDetailEntity> {
-    try {
-      return await this.apiGatewayService.getTerminalsDetail(code);
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
+  findTerminalsDetail(@Query('terminal-code') code: string): Observable<any> {
+    return this.apiGatewayService.getTerminalsDetail(code).pipe(
+      catchError((error) => {
+        throw new RpcException(error);
+      }),
+    );
   }
 
   // Terminal config
@@ -75,24 +77,22 @@ export class ApiGatewayController {
   createTerminalConfig(
     @Body() createTerminalConfigDto: CreateTermnalConfigDto,
   ): Observable<any> {
-    try {
-      return this.apiGatewayService.createTerminalConfig(
-        createTerminalConfigDto,
+    return this.apiGatewayService
+      .createTerminalConfig(createTerminalConfigDto)
+      .pipe(
+        catchError((error) => {
+          throw new RpcException(error);
+        }),
       );
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
   }
 
   @Get('terminal-config')
-  async findTerminalConfig(
-    @Query('terminal-code') code: string,
-  ): Promise<TerminalConfigEntity> {
-    try {
-      return await this.apiGatewayService.getTerminalsConfig(code);
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
+  findTerminalConfig(@Query('terminal-code') code: string): Observable<any> {
+    return this.apiGatewayService.getTerminalsConfig(code).pipe(
+      catchError((error) => {
+        throw new RpcException(error);
+      }),
+    );
   }
 
   // Operation
@@ -100,39 +100,39 @@ export class ApiGatewayController {
   createOperation(
     @Body() createOperationDto: CreateOperationDto,
   ): Observable<any> {
-    return this.apiGatewayService.createOperation(createOperationDto);
+    return this.apiGatewayService.createOperation(createOperationDto).pipe(
+      catchError((error) => {
+        throw new RpcException(error);
+      }),
+    );
   }
 
   @Get('operation')
-  async findOperation(
-    @Query('terminal-code') code: string,
-  ): Promise<OperationEntity> {
-    try {
-      return await this.apiGatewayService.getOperation(code);
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
+  findOperation(@Query('terminal-code') code: string): Observable<any> {
+    return this.apiGatewayService.getOperation(code).pipe(
+      catchError((error) => {
+        throw new RpcException(error);
+      }),
+    );
   }
 
   // ------- CARRIER -------
   @Post('carrier')
   createCarrier(@Body() createCarrierDto: CreateCarrierDto): Observable<any> {
-    try {
-      return this.apiGatewayService.createCarrier(createCarrierDto);
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
+    return this.apiGatewayService.createCarrier(createCarrierDto).pipe(
+      catchError((error) => {
+        throw new RpcException(error);
+      }),
+    );
   }
 
   @Get('carrier')
-  async findCarrier(
-    @Query('terminal-code') code: string,
-  ): Promise<OperationEntity> {
-    try {
-      return await this.apiGatewayService.getCarrier(code);
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
+  findCarrier(@Query('terminal-code') code: string): Observable<any> {
+    return this.apiGatewayService.getCarrier(code).pipe(
+      catchError((error) => {
+        throw new RpcException(error);
+      }),
+    );
   }
 
   @Post('terminal-logo/upload-files')
@@ -157,11 +157,11 @@ export class ApiGatewayController {
     @Body()
     createTerminalLogoDto: CreateTerminalLogoDto,
   ) {
-    try {
-      const { terminal } = createTerminalLogoDto;
-      return this.apiGatewayService.createLogo(logo, storage, terminal);
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
+    const { terminal } = createTerminalLogoDto;
+    return this.apiGatewayService.createLogo(logo, storage, terminal).pipe(
+      catchError((error) => {
+        throw new RpcException(error);
+      }),
+    );
   }
 }

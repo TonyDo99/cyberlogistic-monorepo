@@ -1,20 +1,19 @@
-import { Catch, ArgumentsHost, RpcExceptionFilter } from '@nestjs/common';
+import { Catch, ArgumentsHost, ExceptionFilter } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-// import { Request, Response } from 'express';
-import { Observable, throwError } from 'rxjs';
+import { Request, Response } from 'express';
 
 @Catch(RpcException)
-export class RpcExceptionOne implements RpcExceptionFilter<RpcException> {
-  catch(exception: RpcException, host: ArgumentsHost): Observable<any> {
-    return throwError(() => exception.getError());
+export class RpcExceptionOne implements ExceptionFilter {
+  catch(exception: RpcException, host: ArgumentsHost) {
+    const err = exception.getError();
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
+    response.json({
+      code: err['code'],
+      message: err['detail'],
+      path: request.url,
+      timestamp: new Date().toISOString(),
+    });
   }
-  // const ctx = host.switchToHttp();
-  // const response = ctx.getResponse<Response>();
-  // const request = ctx.getRequest<Request>();
-  // const error: any = exception.getError();
-  // return response.status(error.code).json({
-  //   path: request.url,
-  //   timestamp: new Date().toISOString(),
-  //   description: error,
-  // });
 }

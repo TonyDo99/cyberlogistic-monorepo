@@ -1,7 +1,7 @@
-import { Controller, BadRequestException } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { TerminalDetailService } from './terminal-detail-service.service';
 import { CreateTerminalDetailDto } from '@app/common/dto/terminal-detail/create-terminal-detail.dto';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { CreateOperationDto } from '@app/common/dto/operation/create-operation.dto';
 import { CreateCarrierDto } from '@app/common/dto/carrier/create-carrier.dto';
 import { DestinationStore } from '@app/common/types';
@@ -15,7 +15,7 @@ export class TerminalDetailController {
     try {
       return await this.terminalDetailService.create(createTerminalDetailDto);
     } catch (error) {
-      throw new BadRequestException(error.message);
+      throw new RpcException(error);
     }
   }
 
@@ -25,43 +25,48 @@ export class TerminalDetailController {
       if (code) return await this.terminalDetailService.findOneBelong(code);
       else return await this.terminalDetailService.findAll();
     } catch (error) {
-      throw new BadRequestException(error.message);
+      throw new RpcException(error);
     }
   }
 
   @MessagePattern('operation-creating')
-  createOperation(@Payload() createOperationDto: CreateOperationDto) {
-    return this.terminalDetailService.createOperation(createOperationDto);
+  async createOperation(@Payload() createOperationDto: CreateOperationDto) {
+    try {
+      return await this.terminalDetailService.createOperation(
+        createOperationDto,
+      );
+    } catch (error) {
+      throw new RpcException(error);
+    }
   }
 
   @MessagePattern('operation-listing')
   async findOperation(@Payload() code: string) {
     try {
       if (code)
-        return await this.terminalDetailService.findOperationBelong(
-          JSON.parse(code),
-        );
+        return await this.terminalDetailService.findOperationBelong(code);
       else return await this.terminalDetailService.findAllOperation();
     } catch (error) {
-      throw new BadRequestException(error.message);
+      throw new RpcException(error);
     }
   }
 
   @MessagePattern('carrier-creating')
-  createCarrier(@Payload() createCarrierDto: CreateCarrierDto) {
-    return this.terminalDetailService.createCarrier(createCarrierDto);
+  async createCarrier(@Payload() createCarrierDto: CreateCarrierDto) {
+    try {
+      return await this.terminalDetailService.createCarrier(createCarrierDto);
+    } catch (error) {
+      throw new RpcException(error);
+    }
   }
 
   @MessagePattern('carrier-listing')
   async findCarrier(@Payload() code: string) {
     try {
-      if (code)
-        return await this.terminalDetailService.findCarrierBelong(
-          JSON.parse(code),
-        );
+      if (code) return await this.terminalDetailService.findCarrierBelong(code);
       else return await this.terminalDetailService.findAllCarriers();
     } catch (error) {
-      throw new BadRequestException(error.message);
+      throw new RpcException(error);
     }
   }
 
@@ -76,9 +81,13 @@ export class TerminalDetailController {
     terminalCode: string;
   }) {
     try {
-      return this.terminalDetailService.createLogo(file, storage, terminalCode);
+      return await this.terminalDetailService.createLogo(
+        file,
+        storage,
+        terminalCode,
+      );
     } catch (error) {
-      throw new BadRequestException(error.message);
+      throw new RpcException(error);
     }
   }
 }

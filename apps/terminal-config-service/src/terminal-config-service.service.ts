@@ -21,14 +21,7 @@ export class TerminalConfigService {
     const created = await this.terminalConfigEntity.insert(
       createTermnalConfigDto,
     );
-
-    return {
-      headers: {
-        kafka_nestRealm: 'Nest',
-      },
-      key: 'terminalCode',
-      value: JSON.stringify(created),
-    };
+    return JSON.stringify(created);
   }
 
   async findAll() {
@@ -41,34 +34,25 @@ export class TerminalConfigService {
   }
 
   async findOneBelong(terminalCode: string) {
-    let exist = await this.terminalConfigEntity.findOne({
+    await this.terminalService.findOne(terminalCode);
+    const exist = await this.terminalConfigEntity.findOne({
       relations: ['terminal'],
       where: {
         terminal: {
-          code: JSON.parse(terminalCode),
+          code: terminalCode,
         },
       },
     });
 
-    if (!exist) throw new NotFoundException('This terminal does not exist !');
-    else {
-      exist = {
-        ...exist,
-        createdDate: formatUTC(exist.createdDate),
-        updatedDate: formatUTC(exist.updatedDate),
-        terminal: {
-          ...(exist.terminal as TerminalEntity),
-          createdDate: formatUTC(exist.terminal['createdDate']),
-          updatedDate: formatUTC(exist.terminal['updatedDate']),
-        },
-      };
-      return {
-        headers: {
-          kafka_nestRealm: 'Nest',
-        },
-        key: terminalCode,
-        value: JSON.stringify(exist),
-      };
-    }
+    return {
+      ...exist,
+      createdDate: formatUTC(exist.createdDate),
+      updatedDate: formatUTC(exist.updatedDate),
+      terminal: {
+        ...(exist.terminal as TerminalEntity),
+        createdDate: formatUTC(exist.terminal['createdDate']),
+        updatedDate: formatUTC(exist.terminal['updatedDate']),
+      },
+    };
   }
 }

@@ -1,6 +1,6 @@
 import { CreateTermnalConfigDto } from '@app/common/dto/terminal-config/create-termnal-config.dto';
-import { Controller, BadRequestException } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { Controller } from '@nestjs/common';
+import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { TerminalConfigService } from './terminal-config-service.service';
 
 @Controller()
@@ -12,7 +12,7 @@ export class TerminalConfigController {
     try {
       return await this.terminalConfigService.create(createTermnalConfigDto);
     } catch (error) {
-      throw new BadRequestException(error.message);
+      throw new RpcException(error);
     }
   }
 
@@ -22,7 +22,7 @@ export class TerminalConfigController {
       if (!code) return await this.terminalConfigService.findAll();
       else return await this.terminalConfigService.findOneBelong(code);
     } catch (error) {
-      throw new BadRequestException(error.message);
+      throw new RpcException(error);
     }
   }
 }
