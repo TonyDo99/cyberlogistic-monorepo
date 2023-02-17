@@ -70,6 +70,7 @@ export class TerminalDetailController {
     }
   }
 
+  // TODO Change logic saving image
   @MessagePattern('logo-creating')
   async createLogo({
     file,
