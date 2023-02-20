@@ -1,16 +1,14 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { ClientKafka, RpcException } from '@nestjs/microservices';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientKafka } from '@nestjs/microservices';
 
 import { CreateTerminalDto } from '@app/common';
 import { OnModuleInit } from '@nestjs/common';
-import { catchError, lastValueFrom, throwError } from 'rxjs';
 import { Observable } from 'rxjs';
 import { CreateTerminalDetailDto } from '@app/common/dto/terminal-detail/create-terminal-detail.dto';
 import { CreateTermnalConfigDto } from '@app/common/dto/terminal-config/create-termnal-config.dto';
 import { CreateOperationDto } from '@app/common/dto/operation/create-operation.dto';
 import { CreateCarrierDto } from '@app/common/dto/carrier/create-carrier.dto';
 import { DestinationStore } from '@app/common/types';
-import { TerminalEntity } from '@app/common/entities/terminal.entity';
 
 @Injectable()
 export class ApiGatewayService implements OnModuleInit {

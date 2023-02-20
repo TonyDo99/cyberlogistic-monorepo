@@ -4,14 +4,10 @@ import { CreateOperationDto } from '@app/common/dto/operation/create-operation.d
 import { CreateTermnalConfigDto } from '@app/common/dto/terminal-config/create-termnal-config.dto';
 import { CreateTerminalDetailDto } from '@app/common/dto/terminal-detail/create-terminal-detail.dto';
 import { CreateTerminalLogoDto } from '@app/common/dto/terminal-detail/create-terminal-logo.dto';
-import { OperationEntity } from '@app/common/entities/operation-type.entity';
-import { TerminalConfigEntity } from '@app/common/entities/terminal-config.entity';
-import { TerminalDetailEntity } from '@app/common/entities/terminal-detail.entity';
-import { TerminalEntity } from '@app/common/entities/terminal.entity';
+
 import { DestinationStore } from '@app/common/types';
 import { diskStorageOptions, fileFilterOptions } from '@app/common/utils/file';
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
